@@ -27,25 +27,6 @@
             transition: width 0.5s ease;
         }
         
-        .coin-flip {
-            animation: flip 0.6s ease-in-out;
-        }
-        
-        @keyframes flip {
-            0% { transform: rotateY(0deg); }
-            50% { transform: rotateY(180deg); }
-            100% { transform: rotateY(0deg); }
-        }
-        
-        .block-animation {
-            animation: blockSlide 0.8s ease-out;
-        }
-        
-        @keyframes blockSlide {
-            0% { transform: translateX(-100px); opacity: 0; }
-            100% { transform: translateX(0); opacity: 1; }
-        }
-        
         .token-reward {
             animation: tokenBounce 0.6s ease-out;
         }
@@ -83,16 +64,37 @@
             50% { transform: translateX(10px); }
         }
         
-        .milestone-celebration {
-            animation: celebrate 1s ease-out;
+        .lesson-section {
+            opacity: 0.3;
+            pointer-events: none;
+            transition: all 0.3s ease;
         }
         
-        @keyframes celebrate {
-            0% { transform: scale(1) rotate(0deg); }
-            25% { transform: scale(1.1) rotate(5deg); }
-            50% { transform: scale(1.2) rotate(-5deg); }
-            75% { transform: scale(1.1) rotate(5deg); }
-            100% { transform: scale(1) rotate(0deg); }
+        .lesson-section.unlocked {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .quiz-option {
+            transition: all 0.2s ease;
+        }
+        
+        .quiz-option:hover {
+            transform: translateX(5px);
+        }
+        
+        .quiz-option.correct {
+            background-color: #dcfce7;
+            border-color: #16a34a;
+        }
+        
+        .quiz-option.incorrect {
+            background-color: #fef2f2;
+            border-color: #dc2626;
+        }
+        
+        .reading-progress {
+            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -194,7 +196,7 @@
             <div id="dashboard" class="section">
                 <div class="text-center mb-8">
                     <h2 class="text-3xl font-bold text-gray-800 mb-4">Welcome to Your Blockchain Learning Journey!</h2>
-                    <p class="text-gray-600 max-w-2xl mx-auto">Master blockchain technology through interactive modules, quizzes, and real-world simulations. Start with Module 1 and unlock advanced concepts as you progress.</p>
+                    <p class="text-gray-600 max-w-2xl mx-auto">Master blockchain technology through structured lessons and quizzes. Each module must be completed in order to unlock the next level.</p>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -247,7 +249,6 @@
             <!-- Learn Section -->
             <div id="learn" class="section hidden">
                 <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">📚 Interactive Learning Modules</h2>
                     <div id="moduleContent">
                         <p class="text-gray-600 text-center py-8">Select a module from your dashboard to begin learning!</p>
                     </div>
@@ -340,66 +341,583 @@
             level: 'Beginner',
             streak: 0,
             achievements: [],
-            tradeHistory: []
+            tradeHistory: [],
+            currentModuleProgress: {}
         };
 
-        // Learning modules data
+        // Learning modules data with comprehensive content
         const modules = [
             {
                 id: 1,
                 title: "Introduction to Blockchain",
                 description: "Learn the fundamentals and history of blockchain technology",
                 difficulty: "Beginner",
-                duration: "10 min",
+                duration: "15 min",
                 tokens: 15,
-                unlocked: true
+                unlocked: true,
+                content: {
+                    sections: [
+                        {
+                            title: "What is Blockchain?",
+                            content: `
+                                <p class="mb-4">Imagine a digital notebook that everyone can see, but no one can erase or change what's already written. That's essentially what a blockchain is - a revolutionary technology that serves as a transparent, immutable digital ledger of transactions.</p>
+                                
+                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+                                    <p class="text-blue-800"><strong>💡 Key Insight:</strong> Blockchain eliminates the need for a central authority by distributing trust across a network of participants.</p>
+                                </div>
+                                
+                                <p class="mb-4">Think of it like this: instead of having one bank keep track of all transactions, thousands of computers around the world each keep their own copy of the same ledger. When someone wants to make a transaction, all these computers must agree it's valid before it gets added to everyone's ledger.</p>
+                                
+                                <h4 class="text-lg font-semibold mb-3 text-gray-800">🔑 Key Characteristics:</h4>
+                                <ul class="list-disc list-inside mb-4 space-y-2">
+                                    <li><strong>Decentralized:</strong> No single point of control or failure</li>
+                                    <li><strong>Transparent:</strong> All transactions are publicly visible</li>
+                                    <li><strong>Immutable:</strong> Once recorded, data cannot be changed</li>
+                                    <li><strong>Secure:</strong> Protected by advanced cryptography</li>
+                                </ul>
+                            `
+                        },
+                        {
+                            title: "Historical Timeline",
+                            content: `
+                                <p class="mb-4">Blockchain technology didn't appear overnight. It's the result of decades of research in cryptography, computer science, and economics.</p>
+                                
+                                <div class="space-y-4 mb-6">
+                                    <div class="flex items-start">
+                                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                            <span class="text-blue-600 font-bold text-sm">2008</span>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Bitcoin Whitepaper</h5>
+                                            <p class="text-gray-600 text-sm">Satoshi Nakamoto publishes "Bitcoin: A Peer-to-Peer Electronic Cash System", introducing the world to blockchain technology.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start">
+                                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                            <span class="text-green-600 font-bold text-sm">2009</span>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Genesis Block</h5>
+                                            <p class="text-gray-600 text-sm">The first Bitcoin block is mined, marking the birth of the first blockchain network.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start">
+                                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                            <span class="text-purple-600 font-bold text-sm">2015</span>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Ethereum Launch</h5>
+                                            <p class="text-gray-600 text-sm">Ethereum introduces smart contracts, expanding blockchain beyond simple transactions.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start">
+                                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                            <span class="text-red-600 font-bold text-sm">2021+</span>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Mainstream Adoption</h5>
+                                            <p class="text-gray-600 text-sm">NFTs explode in popularity, DeFi reaches $100B+ in value, and major corporations adopt blockchain technology.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `
+                        },
+                        {
+                            title: "Blockchain vs Traditional Systems",
+                            content: `
+                                <p class="mb-4">To truly understand blockchain's revolutionary potential, let's compare it with traditional financial systems:</p>
+                                
+                                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                    <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                                        <h5 class="font-medium text-red-700 mb-3">❌ Traditional Finance</h5>
+                                        <ul class="text-sm text-gray-700 space-y-2">
+                                            <li>• Requires intermediaries (banks, payment processors)</li>
+                                            <li>• Limited operating hours (9-5, weekdays only)</li>
+                                            <li>• High fees for international transfers</li>
+                                            <li>• Centralized control and single points of failure</li>
+                                            <li>• Lengthy settlement times (3-5 business days)</li>
+                                            <li>• Limited transparency and auditability</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                        <h5 class="font-medium text-green-700 mb-3">✅ Blockchain Finance</h5>
+                                        <ul class="text-sm text-gray-700 space-y-2">
+                                            <li>• Direct peer-to-peer transactions</li>
+                                            <li>• 24/7 global availability, 365 days a year</li>
+                                            <li>• Lower transaction costs, especially internationally</li>
+                                            <li>• Decentralized and resilient network</li>
+                                            <li>• Near-instant settlements (minutes, not days)</li>
+                                            <li>• Complete transparency and public auditability</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                                    <p class="text-yellow-800"><strong>🌟 Real Impact:</strong> Blockchain technology is already processing over $10 trillion in annual transaction volume and serving millions of users worldwide who previously had limited access to financial services.</p>
+                                </div>
+                            `
+                        }
+                    ],
+                    quiz: [
+                        {
+                            question: "What is the main characteristic that makes blockchain revolutionary?",
+                            options: [
+                                "It's faster than traditional systems",
+                                "It eliminates the need for a central authority",
+                                "It's cheaper than all alternatives",
+                                "It only works with cryptocurrencies"
+                            ],
+                            correct: 1,
+                            explanation: "Blockchain's revolutionary aspect is that it eliminates the need for a central authority by distributing trust across a network of participants."
+                        },
+                        {
+                            question: "When was the Bitcoin whitepaper published?",
+                            options: ["2007", "2008", "2009", "2010"],
+                            correct: 1,
+                            explanation: "The Bitcoin whitepaper was published by Satoshi Nakamoto in 2008, introducing blockchain technology to the world."
+                        },
+                        {
+                            question: "Which of these is NOT a key characteristic of blockchain?",
+                            options: [
+                                "Decentralized",
+                                "Transparent", 
+                                "Requires bank approval",
+                                "Immutable"
+                            ],
+                            correct: 2,
+                            explanation: "Blockchain specifically eliminates the need for bank approval or any central authority - that's one of its main innovations."
+                        }
+                    ]
+                }
             },
             {
                 id: 2,
                 title: "Understanding Blocks",
                 description: "Deep dive into block structure and components",
-                difficulty: "Beginner", 
-                duration: "15 min",
-                tokens: 15,
-                unlocked: false
+                difficulty: "Beginner",
+                duration: "20 min",
+                tokens: 20,
+                unlocked: false,
+                content: {
+                    sections: [
+                        {
+                            title: "What is a Block?",
+                            content: `
+                                <p class="mb-4">A block is like a page in a digital ledger that contains multiple transactions. Think of it as a container that holds a collection of verified transactions, along with important metadata that links it to other blocks in the chain.</p>
+                                
+                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+                                    <p class="text-blue-800"><strong>💡 Analogy:</strong> If blockchain is like a book, then each block is a page. Each page contains multiple entries (transactions) and is numbered in sequence.</p>
+                                </div>
+                                
+                                <p class="mb-4">But unlike a regular book page, each block contains a special "fingerprint" (called a hash) that uniquely identifies it and connects it to the previous block, creating an unbreakable chain.</p>
+                                
+                                <h4 class="text-lg font-semibold mb-3 text-gray-800">🔍 Why Blocks Matter:</h4>
+                                <ul class="list-disc list-inside mb-4 space-y-2">
+                                    <li><strong>Organization:</strong> Groups transactions together for efficient processing</li>
+                                    <li><strong>Security:</strong> Each block is cryptographically linked to the previous one</li>
+                                    <li><strong>Verification:</strong> All transactions in a block are verified before inclusion</li>
+                                    <li><strong>Immutability:</strong> Once added, blocks become extremely difficult to change</li>
+                                </ul>
+                            `
+                        },
+                        {
+                            title: "Block Anatomy",
+                            content: `
+                                <p class="mb-4">Every block contains several essential components that work together to maintain the blockchain's security and integrity:</p>
+                                
+                                <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                                    <h5 class="text-lg font-medium text-gray-800 mb-4">🧱 Block Components:</h5>
+                                    <div class="space-y-4">
+                                        <div class="flex items-start">
+                                            <div class="w-8 h-8 bg-blue-500 rounded-full mr-3 flex-shrink-0 flex items-center justify-center">
+                                                <span class="text-white text-xs font-bold">1</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Block Header</h6>
+                                                <p class="text-sm text-gray-600">Contains metadata about the block including timestamp, version number, and difficulty target. Think of it as the block's "ID card".</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <div class="w-8 h-8 bg-green-500 rounded-full mr-3 flex-shrink-0 flex items-center justify-center">
+                                                <span class="text-white text-xs font-bold">2</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Previous Block Hash</h6>
+                                                <p class="text-sm text-gray-600">A unique fingerprint of the previous block, creating the "chain" in blockchain. This is what makes the chain tamper-evident.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <div class="w-8 h-8 bg-yellow-500 rounded-full mr-3 flex-shrink-0 flex items-center justify-center">
+                                                <span class="text-white text-xs font-bold">3</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Merkle Root</h6>
+                                                <p class="text-sm text-gray-600">A mathematical summary of all transactions in the block. It's like a "receipt" that proves all transactions are included and unchanged.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <div class="w-8 h-8 bg-red-500 rounded-full mr-3 flex-shrink-0 flex items-center justify-center">
+                                                <span class="text-white text-xs font-bold">4</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Nonce</h6>
+                                                <p class="text-sm text-gray-600">A special number that miners adjust to find a valid block hash. It's like trying different combinations on a lock until it opens.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <div class="w-8 h-8 bg-purple-500 rounded-full mr-3 flex-shrink-0 flex items-center justify-center">
+                                                <span class="text-white text-xs font-bold">5</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Transaction Data</h6>
+                                                <p class="text-sm text-gray-600">The actual transactions being recorded - transfers of cryptocurrency, smart contract executions, or other data.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `
+                        },
+                        {
+                            title: "How Blocks Connect",
+                            content: `
+                                <p class="mb-4">The magic of blockchain lies in how blocks connect to each other, creating an unbreakable chain of trust:</p>
+                                
+                                <div class="bg-gradient-to-r from-blue-100 to-purple-100 p-6 rounded-lg mb-6">
+                                    <h4 class="text-lg font-medium text-gray-800 mb-4">🔗 The Chain Connection</h4>
+                                    <div class="space-y-4">
+                                        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-400">
+                                            <h5 class="font-medium text-blue-700 mb-2">Step 1: Hash Creation</h5>
+                                            <p class="text-sm text-gray-700">Each block gets a unique hash (like a fingerprint) based on all its contents. Change even one character, and the hash changes completely.</p>
+                                        </div>
+                                        
+                                        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-400">
+                                            <h5 class="font-medium text-green-700 mb-2">Step 2: Reference Previous Block</h5>
+                                            <p class="text-sm text-gray-700">Each new block includes the hash of the previous block, creating a link. This is like saying "I come after block XYZ."</p>
+                                        </div>
+                                        
+                                        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-purple-400">
+                                            <h5 class="font-medium text-purple-700 mb-2">Step 3: Tamper Detection</h5>
+                                            <p class="text-sm text-gray-700">If someone tries to change an old block, its hash changes, breaking the chain. Everyone can immediately detect the tampering.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                                    <p class="text-yellow-800"><strong>🔒 Security Insight:</strong> To successfully tamper with blockchain, you'd need to change not just one block, but every subsequent block in the chain - and do it faster than the honest network. This is practically impossible.</p>
+                                </div>
+                            `
+                        }
+                    ],
+                    quiz: [
+                        {
+                            question: "What creates the 'chain' in blockchain?",
+                            options: [
+                                "The transaction data",
+                                "The timestamp",
+                                "Each block containing the hash of the previous block",
+                                "The nonce value"
+                            ],
+                            correct: 2,
+                            explanation: "The 'chain' is created because each block contains the hash of the previous block, linking them together in an unbreakable sequence."
+                        },
+                        {
+                            question: "What is a Merkle Root?",
+                            options: [
+                                "The first transaction in a block",
+                                "A mathematical summary of all transactions in the block",
+                                "The block's creation timestamp",
+                                "The miner's reward address"
+                            ],
+                            correct: 1,
+                            explanation: "A Merkle Root is a mathematical summary (hash) of all transactions in the block, providing a way to verify that all transactions are included and unchanged."
+                        },
+                        {
+                            question: "What happens if someone tries to change data in an old block?",
+                            options: [
+                                "Nothing, changes are allowed",
+                                "Only that block is affected",
+                                "The block's hash changes, breaking the chain and making tampering detectable",
+                                "The entire blockchain is deleted"
+                            ],
+                            correct: 2,
+                            explanation: "Changing data in a block changes its hash, which breaks the chain connection and makes the tampering immediately detectable to all network participants."
+                        }
+                    ]
+                }
             },
             {
                 id: 3,
                 title: "Decentralization & Distribution",
                 description: "Core principles of decentralized networks",
                 difficulty: "Intermediate",
-                duration: "20 min", 
-                tokens: 20,
-                unlocked: false
-            },
-            {
-                id: 4,
-                title: "Cryptography & Security",
-                description: "Hash functions, digital signatures, and security",
-                difficulty: "Intermediate",
                 duration: "25 min",
-                tokens: 20,
-                unlocked: false
-            },
-            {
-                id: 5,
-                title: "Tokens & Smart Contracts", 
-                description: "Fungible vs non-fungible tokens and smart contracts",
-                difficulty: "Advanced",
-                duration: "30 min",
                 tokens: 25,
-                unlocked: false
-            },
-            {
-                id: 6,
-                title: "Consensus Mechanisms",
-                description: "Proof of Work, Proof of Stake, and other consensus algorithms",
-                difficulty: "Advanced", 
-                duration: "35 min",
-                tokens: 25,
-                unlocked: false
+                unlocked: false,
+                content: {
+                    sections: [
+                        {
+                            title: "Understanding Network Architectures",
+                            content: `
+                                <p class="mb-4">To understand blockchain's revolutionary nature, we need to compare different network architectures and see why decentralization matters:</p>
+                                
+                                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                                    <div class="bg-red-50 p-4 rounded-lg border-2 border-red-200">
+                                        <h5 class="text-lg font-medium text-red-700 mb-3 text-center">🏢 Centralized</h5>
+                                        <div class="text-center mb-4">
+                                            <div class="inline-block">
+                                                <div class="w-8 h-8 bg-red-500 rounded-full mx-auto mb-2"></div>
+                                                <div class="flex justify-center space-x-2">
+                                                    <div class="w-4 h-4 bg-red-300 rounded-full"></div>
+                                                    <div class="w-4 h-4 bg-red-300 rounded-full"></div>
+                                                    <div class="w-4 h-4 bg-red-300 rounded-full"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <ul class="text-sm text-gray-700 space-y-1">
+                                            <li>• Single point of control</li>
+                                            <li>• Single point of failure</li>
+                                            <li>• Fast decision making</li>
+                                            <li>• Requires trust in authority</li>
+                                            <li>• Examples: Traditional banks, Facebook</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
+                                        <h5 class="text-lg font-medium text-yellow-700 mb-3 text-center">🌐 Decentralized</h5>
+                                        <div class="text-center mb-4">
+                                            <div class="inline-block">
+                                                <div class="flex justify-center space-x-2 mb-2">
+                                                    <div class="w-6 h-6 bg-yellow-500 rounded-full"></div>
+                                                    <div class="w-6 h-6 bg-yellow-500 rounded-full"></div>
+                                                </div>
+                                                <div class="flex justify-center space-x-1">
+                                                    <div class="w-3 h-3 bg-yellow-300 rounded-full"></div>
+                                                    <div class="w-3 h-3 bg-yellow-300 rounded-full"></div>
+                                                    <div class="w-3 h-3 bg-yellow-300 rounded-full"></div>
+                                                    <div class="w-3 h-3 bg-yellow-300 rounded-full"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <ul class="text-sm text-gray-700 space-y-1">
+                                            <li>• Multiple control points</li>
+                                            <li>• Reduced single points of failure</li>
+                                            <li>• Federated decision making</li>
+                                            <li>• Partial trust required</li>
+                                            <li>• Examples: Email networks, DNS</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="bg-green-50 p-4 rounded-lg border-2 border-green-200">
+                                        <h5 class="text-lg font-medium text-green-700 mb-3 text-center">🕸️ Distributed</h5>
+                                        <div class="text-center mb-4">
+                                            <div class="inline-block">
+                                                <div class="grid grid-cols-3 gap-1">
+                                                    <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                                                    <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                                                    <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                                                    <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                                                    <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                                                    <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <ul class="text-sm text-gray-700 space-y-1">
+                                            <li>• No central control</li>
+                                            <li>• Highly resilient</li>
+                                            <li>• Consensus-based decisions</li>
+                                            <li>• Trustless system</li>
+                                            <li>• Examples: Bitcoin, BitTorrent</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                                    <p class="text-blue-800"><strong>💡 Key Insight:</strong> Blockchain networks are distributed systems where every participant has equal power and maintains the same copy of the ledger. No single entity can control or manipulate the system.</p>
+                                </div>
+                            `
+                        },
+                        {
+                            title: "Benefits of Decentralization",
+                            content: `
+                                <p class="mb-4">Decentralization brings numerous advantages that make blockchain technology revolutionary for many applications:</p>
+                                
+                                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                    <div class="space-y-4">
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span class="text-green-600 text-xl">🛡️</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Enhanced Security</h6>
+                                                <p class="text-sm text-gray-600">No single point of attack. Hackers would need to compromise the majority of the network simultaneously, which is extremely difficult and expensive.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span class="text-blue-600 text-xl">🌍</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Global Accessibility</h6>
+                                                <p class="text-sm text-gray-600">Available 24/7 worldwide without geographical restrictions. Anyone with internet access can participate.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span class="text-purple-600 text-xl">🔍</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Transparency</h6>
+                                                <p class="text-sm text-gray-600">All transactions are publicly verifiable and auditable. No hidden processes or secret decisions.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="space-y-4">
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span class="text-yellow-600 text-xl">🚫</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Censorship Resistance</h6>
+                                                <p class="text-sm text-gray-600">No single entity can block, freeze, or reverse transactions. The network operates by consensus, not authority.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span class="text-red-600 text-xl">💰</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Reduced Costs</h6>
+                                                <p class="text-sm text-gray-600">Eliminates intermediaries and their associated fees. Direct peer-to-peer transactions reduce overall costs.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span class="text-indigo-600 text-xl">⚡</span>
+                                            </div>
+                                            <div>
+                                                <h6 class="font-medium text-gray-800">Innovation</h6>
+                                                <p class="text-sm text-gray-600">Open protocols enable permissionless innovation. Anyone can build on top of the network without asking permission.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                                    <p class="text-green-800"><strong>🌟 Real-World Impact:</strong> Decentralized systems have enabled financial inclusion for over 1.7 billion unbanked people worldwide, providing them access to financial services for the first time.</p>
+                                </div>
+                            `
+                        },
+                        {
+                            title: "Challenges and Trade-offs",
+                            content: `
+                                <p class="mb-4">While decentralization offers many benefits, it also comes with challenges that developers and users must understand:</p>
+                                
+                                <div class="bg-orange-50 p-6 rounded-lg mb-6 border border-orange-200">
+                                    <h4 class="text-lg font-medium text-orange-800 mb-4">⚖️ Key Challenges:</h4>
+                                    <div class="grid md:grid-cols-2 gap-6">
+                                        <div>
+                                            <h6 class="font-medium text-orange-800 mb-2">⚡ Scalability</h6>
+                                            <p class="text-sm text-orange-700 mb-4">Processing transactions across thousands of nodes can be slower than centralized systems. Bitcoin processes ~7 transactions per second vs Visa's ~24,000.</p>
+                                            
+                                            <h6 class="font-medium text-orange-800 mb-2">🔋 Energy Consumption</h6>
+                                            <p class="text-sm text-orange-700">Some consensus mechanisms like Proof of Work require significant computational power, leading to high energy usage.</p>
+                                        </div>
+                                        <div>
+                                            <h6 class="font-medium text-orange-800 mb-2">🎯 Governance</h6>
+                                            <p class="text-sm text-orange-700 mb-4">Making network-wide decisions can be slow and contentious when thousands of participants need to agree.</p>
+                                            
+                                            <h6 class="font-medium text-orange-800 mb-2">📚 User Experience</h6>
+                                            <p class="text-sm text-orange-700">Can be more complex for average users compared to traditional centralized systems with customer support.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                                    <h5 class="font-medium text-blue-800 mb-2">🔄 The Blockchain Trilemma</h5>
+                                    <p class="text-sm text-blue-700 mb-3">Most blockchain networks face a fundamental trade-off between three properties:</p>
+                                    <div class="grid grid-cols-3 gap-4 text-center">
+                                        <div class="bg-white p-3 rounded border">
+                                            <div class="text-2xl mb-1">🔒</div>
+                                            <div class="font-medium text-blue-800">Security</div>
+                                            <div class="text-xs text-blue-600">Resistance to attacks</div>
+                                        </div>
+                                        <div class="bg-white p-3 rounded border">
+                                            <div class="text-2xl mb-1">⚡</div>
+                                            <div class="font-medium text-blue-800">Scalability</div>
+                                            <div class="text-xs text-blue-600">Transaction throughput</div>
+                                        </div>
+                                        <div class="bg-white p-3 rounded border">
+                                            <div class="text-2xl mb-1">🌐</div>
+                                            <div class="font-medium text-blue-800">Decentralization</div>
+                                            <div class="text-xs text-blue-600">No central control</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-purple-50 border-l-4 border-purple-400 p-4">
+                                    <p class="text-purple-800"><strong>🚀 Innovation Response:</strong> The blockchain community is actively developing solutions like Layer 2 scaling, improved consensus mechanisms, and better user interfaces to address these challenges while maintaining decentralization benefits.</p>
+                                </div>
+                            `
+                        }
+                    ],
+                    quiz: [
+                        {
+                            question: "What is the main difference between decentralized and distributed systems?",
+                            options: [
+                                "Decentralized systems are faster",
+                                "Distributed systems have no central control points at all",
+                                "Decentralized systems are more expensive",
+                                "There is no difference"
+                            ],
+                            correct: 1,
+                            explanation: "Distributed systems (like blockchain) have no central control points at all, while decentralized systems may still have multiple control points or authorities."
+                        },
+                        {
+                            question: "Which is NOT a benefit of decentralization?",
+                            options: [
+                                "Enhanced security",
+                                "Censorship resistance",
+                                "Faster transaction processing",
+                                "Global accessibility"
+                            ],
+                            correct: 2,
+                            explanation: "Decentralized systems are often slower than centralized ones because they need consensus from many participants, not just one central authority."
+                        },
+                        {
+                            question: "What is the 'blockchain trilemma'?",
+                            options: [
+                                "The choice between Bitcoin, Ethereum, and other cryptocurrencies",
+                                "The trade-off between security, scalability, and decentralization",
+                                "The decision between public, private, and hybrid blockchains",
+                                "The balance between miners, users, and developers"
+                            ],
+                            correct: 1,
+                            explanation: "The blockchain trilemma refers to the challenge of optimizing security, scalability, and decentralization simultaneously - improving one often requires compromising another."
+                        }
+                    ]
+                }
             }
         ];
+
+        // Current module state
+        let currentModule = null;
+        let currentSectionIndex = 0;
+        let quizStarted = false;
+        let currentQuizQuestion = 0;
+        let quizAnswers = [];
 
         // Login functionality
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -418,7 +936,6 @@
                 return;
             }
             
-            // Login successful
             currentUser = username;
             loadUserProgress();
             showMainPlatform();
@@ -430,7 +947,6 @@
             if (savedProgress) {
                 userProgress = JSON.parse(savedProgress);
             } else {
-                // New user - initialize with default progress
                 userProgress = {
                     completedModules: [],
                     tokens: 0,
@@ -438,7 +954,8 @@
                     level: 'Beginner',
                     streak: 0,
                     achievements: [],
-                    tradeHistory: []
+                    tradeHistory: [],
+                    currentModuleProgress: {}
                 };
                 saveUserProgress();
                 showNotification('New account created! Start with Module 1.', 'info');
@@ -460,7 +977,6 @@
             showSection('dashboard');
         }
 
-        // Logout functionality
         document.getElementById('logoutBtn').addEventListener('click', function() {
             currentUser = null;
             document.getElementById('loginScreen').classList.remove('hidden');
@@ -476,7 +992,6 @@
                 const section = this.dataset.section;
                 showSection(section);
                 
-                // Update active nav button
                 document.querySelectorAll('.nav-btn').forEach(b => {
                     b.classList.remove('border-blue-400');
                     b.classList.add('border-transparent');
@@ -487,12 +1002,10 @@
         });
 
         function showSection(sectionName) {
-            // Hide all sections
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.add('hidden');
             });
             
-            // Show selected section
             document.getElementById(sectionName).classList.remove('hidden');
             
             if (sectionName === 'dashboard') {
@@ -516,13 +1029,16 @@
                 const statusText = isCompleted ? 'Completed' : isUnlocked ? 'Available' : 'Locked';
                 const statusClass = isCompleted ? 'text-green-600' : isUnlocked ? 'text-blue-600' : 'text-gray-500';
                 
+                const difficultyColor = module.difficulty === 'Beginner' ? 'blue' : 
+                                      module.difficulty === 'Intermediate' ? 'yellow' : 'red';
+                
                 moduleDiv.innerHTML = `
                     <div class="module-icon w-10 h-10 ${iconClass} rounded-full flex items-center justify-center mr-4 text-lg">${iconText}</div>
                     <div class="flex-1">
                         <h4 class="font-medium text-gray-800">Module ${module.id}: ${module.title}</h4>
                         <p class="text-sm text-gray-600">${module.description}</p>
                         <div class="flex items-center mt-2">
-                            <span class="text-xs bg-${module.difficulty === 'Beginner' ? 'blue' : module.difficulty === 'Intermediate' ? 'yellow' : 'red'}-100 text-${module.difficulty === 'Beginner' ? 'blue' : module.difficulty === 'Intermediate' ? 'yellow' : 'red'}-800 px-2 py-1 rounded">${module.difficulty}</span>
+                            <span class="text-xs bg-${difficultyColor}-100 text-${difficultyColor}-800 px-2 py-1 rounded">${module.difficulty}</span>
                             <span class="text-xs text-gray-500 ml-2">⏱️ ${module.duration}</span>
                             <span class="text-xs text-yellow-600 ml-2">🪙 ${module.tokens} tokens</span>
                         </div>
@@ -539,10 +1055,13 @@
         }
 
         function startModule(moduleId) {
-            showNotification(`Starting Module ${moduleId}...`, 'info');
-            showSection('learn');
+            currentModule = modules.find(m => m.id === moduleId);
+            currentSectionIndex = 0;
+            quizStarted = false;
+            currentQuizQuestion = 0;
+            quizAnswers = [];
             
-            // Update nav
+            showSection('learn');
             document.querySelectorAll('.nav-btn').forEach(b => {
                 b.classList.remove('border-blue-400');
                 b.classList.add('border-transparent');
@@ -550,90 +1069,368 @@
             document.querySelector('[data-section="learn"]').classList.remove('border-transparent');
             document.querySelector('[data-section="learn"]').classList.add('border-blue-400');
             
-            // Show module content
+            renderModuleContent();
+        }
+
+        function renderModuleContent() {
             const moduleContent = document.getElementById('moduleContent');
-            const module = modules.find(m => m.id === moduleId);
+            
+            if (!quizStarted) {
+                // Show lesson content
+                const section = currentModule.content.sections[currentSectionIndex];
+                const totalSections = currentModule.content.sections.length;
+                const progressPercent = ((currentSectionIndex + 1) / totalSections) * 100;
+                
+                moduleContent.innerHTML = `
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mr-4 text-xl">${currentModule.id}</div>
+                                <div>
+                                    <h2 class="text-2xl font-bold text-blue-600">Module ${currentModule.id}: ${currentModule.title}</h2>
+                                    <p class="text-gray-600">${currentModule.description}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-gray-500">Section ${currentSectionIndex + 1} of ${totalSections}</div>
+                                <div class="text-xs text-yellow-600">🪙 ${currentModule.tokens} tokens reward</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Reading Progress -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-700">Reading Progress</span>
+                                <span class="text-sm text-gray-600">${Math.round(progressPercent)}% Complete</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="reading-progress bg-gradient-to-r from-green-500 to-blue-600 h-2 rounded-full" style="width: ${progressPercent}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section Content -->
+                        <div class="bg-white border rounded-lg p-6 mb-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">${section.title}</h3>
+                            <div class="prose max-w-none text-gray-700">
+                                ${section.content}
+                            </div>
+                        </div>
+                        
+                        <!-- Navigation -->
+                        <div class="flex justify-between items-center">
+                            <button id="prevSection" class="px-6 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 transition-colors" 
+                                    ${currentSectionIndex === 0 ? 'disabled' : ''}>
+                                ← Previous Section
+                            </button>
+                            
+                            <div class="flex items-center space-x-2">
+                                ${currentModule.content.sections.map((_, index) => 
+                                    `<div class="w-3 h-3 rounded-full ${index <= currentSectionIndex ? 'bg-blue-500' : 'bg-gray-300'}"></div>`
+                                ).join('')}
+                            </div>
+                            
+                            <button id="nextSection" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                ${currentSectionIndex === totalSections - 1 ? 'Take Quiz →' : 'Next Section →'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Add event listeners
+                const prevBtn = document.getElementById('prevSection');
+                const nextBtn = document.getElementById('nextSection');
+                
+                if (prevBtn && !prevBtn.disabled) {
+                    prevBtn.addEventListener('click', () => {
+                        if (currentSectionIndex > 0) {
+                            currentSectionIndex--;
+                            renderModuleContent();
+                        }
+                    });
+                }
+                
+                nextBtn.addEventListener('click', () => {
+                    if (currentSectionIndex < totalSections - 1) {
+                        currentSectionIndex++;
+                        renderModuleContent();
+                    } else {
+                        // Start quiz
+                        quizStarted = true;
+                        currentQuizQuestion = 0;
+                        quizAnswers = [];
+                        renderModuleContent();
+                    }
+                });
+                
+            } else {
+                // Show quiz
+                renderQuiz();
+            }
+        }
+
+        function renderQuiz() {
+            const moduleContent = document.getElementById('moduleContent');
+            const quiz = currentModule.content.quiz;
+            const question = quiz[currentQuizQuestion];
+            const totalQuestions = quiz.length;
+            const progressPercent = ((currentQuizQuestion + 1) / totalQuestions) * 100;
             
             moduleContent.innerHTML = `
                 <div class="mb-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mr-4 text-xl">${moduleId}</div>
+                    <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h3 class="text-xl font-semibold text-blue-600">Module ${moduleId}: ${module.title}</h3>
-                            <p class="text-gray-600">${module.description}</p>
+                            <h2 class="text-2xl font-bold text-purple-600">📝 Module ${currentModule.id} Quiz</h2>
+                            <p class="text-gray-600">Test your understanding to earn tokens and unlock the next module</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-500">Question ${currentQuizQuestion + 1} of ${totalQuestions}</div>
+                            <div class="text-xs text-yellow-600">🪙 ${currentModule.tokens} tokens at stake</div>
                         </div>
                     </div>
                     
-                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg mb-6">
-                        <h4 class="text-lg font-medium text-gray-800 mb-3">📚 Learning Content</h4>
-                        <p class="text-gray-700 mb-4">
-                            This module covers essential concepts about ${module.title.toLowerCase()}. 
-                            You'll learn through interactive content, examples, and practical applications.
-                        </p>
-                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                            <p class="text-yellow-800">
-                                <strong>💡 Key Learning:</strong> Complete this module to earn ${module.tokens} tokens and unlock the next level!
-                            </p>
+                    <!-- Quiz Progress -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700">Quiz Progress</span>
+                            <span class="text-sm text-gray-600">${Math.round(progressPercent)}% Complete</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="reading-progress bg-gradient-to-r from-purple-500 to-pink-600 h-2 rounded-full" style="width: ${progressPercent}%"></div>
                         </div>
                     </div>
                     
-                    <div class="text-center">
-                        <button onclick="completeModule(${moduleId})" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium">
-                            Complete Module ${moduleId} → Earn ${module.tokens} Tokens
+                    <!-- Question -->
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg mb-6 border border-purple-200">
+                        <h3 class="text-lg font-medium text-gray-800 mb-4">${question.question}</h3>
+                        <div class="space-y-3" id="quizOptions">
+                            ${question.options.map((option, index) => `
+                                <button class="quiz-option w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all" 
+                                        data-option="${index}">
+                                    <span class="font-medium text-gray-700">${String.fromCharCode(65 + index)}.</span> ${option}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Quiz Navigation -->
+                    <div class="flex justify-between items-center">
+                        <button id="prevQuizQuestion" class="px-6 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 transition-colors" 
+                                ${currentQuizQuestion === 0 ? 'disabled' : ''}>
+                            ← Previous Question
                         </button>
+                        
+                        <div class="flex items-center space-x-2">
+                            ${quiz.map((_, index) => 
+                                `<div class="w-3 h-3 rounded-full ${
+                                    index < currentQuizQuestion ? 'bg-green-500' : 
+                                    index === currentQuizQuestion ? 'bg-purple-500' : 'bg-gray-300'
+                                }"></div>`
+                            ).join('')}
+                        </div>
+                        
+                        <button id="nextQuizQuestion" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50" disabled>
+                            ${currentQuizQuestion === totalQuestions - 1 ? 'Finish Quiz' : 'Next Question →'}
+                        </button>
+                    </div>
+                    
+                    <!-- Answer Feedback -->
+                    <div id="answerFeedback" class="hidden mt-6 p-4 rounded-lg"></div>
+                </div>
+            `;
+            
+            // Add quiz option listeners
+            document.querySelectorAll('.quiz-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const selectedOption = parseInt(this.dataset.option);
+                    selectQuizOption(selectedOption);
+                });
+            });
+            
+            // Add navigation listeners
+            const prevBtn = document.getElementById('prevQuizQuestion');
+            const nextBtn = document.getElementById('nextQuizQuestion');
+            
+            if (prevBtn && !prevBtn.disabled) {
+                prevBtn.addEventListener('click', () => {
+                    if (currentQuizQuestion > 0) {
+                        currentQuizQuestion--;
+                        renderQuiz();
+                    }
+                });
+            }
+            
+            nextBtn.addEventListener('click', () => {
+                if (currentQuizQuestion < totalQuestions - 1) {
+                    currentQuizQuestion++;
+                    renderQuiz();
+                } else {
+                    finishQuiz();
+                }
+            });
+        }
+
+        function selectQuizOption(selectedOption) {
+            const question = currentModule.content.quiz[currentQuizQuestion];
+            const isCorrect = selectedOption === question.correct;
+            
+            // Store answer
+            quizAnswers[currentQuizQuestion] = {
+                selected: selectedOption,
+                correct: isCorrect
+            };
+            
+            // Update UI
+            document.querySelectorAll('.quiz-option').forEach((option, index) => {
+                option.classList.remove('correct', 'incorrect');
+                if (index === selectedOption) {
+                    option.classList.add(isCorrect ? 'correct' : 'incorrect');
+                }
+                if (index === question.correct && !isCorrect) {
+                    option.classList.add('correct');
+                }
+            });
+            
+            // Show feedback
+            const feedback = document.getElementById('answerFeedback');
+            feedback.className = `mt-6 p-4 rounded-lg ${isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`;
+            feedback.innerHTML = `
+                <div class="flex items-start">
+                    <span class="text-2xl mr-3">${isCorrect ? '✅' : '❌'}</span>
+                    <div>
+                        <div class="font-medium ${isCorrect ? 'text-green-800' : 'text-red-800'} mb-2">
+                            ${isCorrect ? 'Correct!' : 'Incorrect'}
+                        </div>
+                        <div class="text-sm ${isCorrect ? 'text-green-700' : 'text-red-700'}">
+                            ${question.explanation}
+                        </div>
                     </div>
                 </div>
             `;
+            feedback.classList.remove('hidden');
+            
+            // Enable next button
+            document.getElementById('nextQuizQuestion').disabled = false;
         }
 
-        function completeModule(moduleId) {
-            if (!userProgress.completedModules.includes(moduleId)) {
-                userProgress.completedModules.push(moduleId);
-                const module = modules.find(m => m.id === moduleId);
-                userProgress.tokens += module.tokens;
+        function finishQuiz() {
+            const correctAnswers = quizAnswers.filter(answer => answer.correct).length;
+            const totalQuestions = currentModule.content.quiz.length;
+            const scorePercent = Math.round((correctAnswers / totalQuestions) * 100);
+            const passed = scorePercent >= 70; // Need 70% to pass
+            
+            if (passed) {
+                // Award tokens and complete module
+                if (!userProgress.completedModules.includes(currentModule.id)) {
+                    userProgress.completedModules.push(currentModule.id);
+                    userProgress.tokens += currentModule.tokens;
+                    userProgress.quizScores.push(scorePercent);
+                    
+                    // Update level
+                    const completedCount = userProgress.completedModules.length;
+                    if (completedCount >= 6) userProgress.level = 'Expert';
+                    else if (completedCount >= 4) userProgress.level = 'Advanced';
+                    else if (completedCount >= 2) userProgress.level = 'Intermediate';
+                    
+                    saveUserProgress();
+                    updateUI();
+                    
+                    showNotification(`🎉 Module ${currentModule.id} completed! +${currentModule.tokens} tokens earned!`, 'success');
+                    
+                    // Celebration animation
+                    const tokenElement = document.getElementById('tokenCount');
+                    tokenElement.classList.add('token-reward');
+                    setTimeout(() => tokenElement.classList.remove('token-reward'), 600);
+                }
                 
-                // Update level based on completed modules
-                const completedCount = userProgress.completedModules.length;
-                if (completedCount >= 6) userProgress.level = 'Expert';
-                else if (completedCount >= 4) userProgress.level = 'Advanced';
-                else if (completedCount >= 2) userProgress.level = 'Intermediate';
+                // Show success screen
+                const moduleContent = document.getElementById('moduleContent');
+                moduleContent.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-6">🎉</div>
+                        <h2 class="text-3xl font-bold text-green-600 mb-4">Congratulations!</h2>
+                        <p class="text-xl text-gray-700 mb-6">You've successfully completed Module ${currentModule.id}</p>
+                        
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-6 max-w-md mx-auto mb-6">
+                            <div class="text-lg font-medium text-green-800 mb-2">Quiz Results</div>
+                            <div class="text-3xl font-bold text-green-600 mb-2">${scorePercent}%</div>
+                            <div class="text-sm text-green-700">${correctAnswers} out of ${totalQuestions} correct</div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto mb-8">
+                            <div class="flex items-center justify-center">
+                                <span class="text-2xl mr-2">🪙</span>
+                                <span class="text-lg font-medium text-yellow-800">+${currentModule.tokens} Tokens Earned!</span>
+                            </div>
+                        </div>
+                        
+                        <button onclick="returnToDashboard()" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium mr-4">
+                            Return to Dashboard
+                        </button>
+                        
+                        ${userProgress.completedModules.length < modules.length ? 
+                            `<button onclick="startModule(${currentModule.id + 1})" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium">
+                                Next Module →
+                            </button>` : ''
+                        }
+                    </div>
+                `;
                 
-                saveUserProgress();
-                updateUI();
-                
-                showNotification(`🎉 Module ${moduleId} completed! +${module.tokens} tokens earned!`, 'success');
-                
-                // Show celebration animation
-                const tokenElement = document.getElementById('tokenCount');
-                tokenElement.classList.add('token-reward');
-                setTimeout(() => tokenElement.classList.remove('token-reward'), 600);
-                
-                // Go back to dashboard
-                setTimeout(() => {
-                    showSection('dashboard');
-                    document.querySelectorAll('.nav-btn').forEach(b => {
-                        b.classList.remove('border-blue-400');
-                        b.classList.add('border-transparent');
-                    });
-                    document.querySelector('[data-section="dashboard"]').classList.remove('border-transparent');
-                    document.querySelector('[data-section="dashboard"]').classList.add('border-blue-400');
-                }, 1500);
+            } else {
+                // Show retry screen
+                const moduleContent = document.getElementById('moduleContent');
+                moduleContent.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-6">📚</div>
+                        <h2 class="text-2xl font-bold text-orange-600 mb-4">Keep Learning!</h2>
+                        <p class="text-lg text-gray-700 mb-6">You scored ${scorePercent}% - you need 70% to pass</p>
+                        
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-6 max-w-md mx-auto mb-6">
+                            <div class="text-lg font-medium text-orange-800 mb-2">Quiz Results</div>
+                            <div class="text-3xl font-bold text-orange-600 mb-2">${scorePercent}%</div>
+                            <div class="text-sm text-orange-700">${correctAnswers} out of ${totalQuestions} correct</div>
+                        </div>
+                        
+                        <p class="text-gray-600 mb-8 max-w-md mx-auto">Review the lesson content and try again. You can retake the quiz as many times as needed!</p>
+                        
+                        <button onclick="startModule(${currentModule.id})" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium mr-4">
+                            Review Lesson
+                        </button>
+                        
+                        <button onclick="retakeQuiz()" class="bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 transition-colors font-medium">
+                            Retake Quiz
+                        </button>
+                    </div>
+                `;
             }
+        }
+
+        function retakeQuiz() {
+            quizStarted = true;
+            currentQuizQuestion = 0;
+            quizAnswers = [];
+            renderModuleContent();
+        }
+
+        function returnToDashboard() {
+            showSection('dashboard');
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('border-blue-400');
+                b.classList.add('border-transparent');
+            });
+            document.querySelector('[data-section="dashboard"]').classList.remove('border-transparent');
+            document.querySelector('[data-section="dashboard"]').classList.add('border-blue-400');
         }
 
         function updateUI() {
             if (!currentUser) return;
             
-            // Update header
             document.getElementById('tokenCount').textContent = userProgress.tokens;
             document.getElementById('levelDisplay').textContent = userProgress.level;
             
-            // Update progress bar
             const progressPercent = (userProgress.completedModules.length / modules.length) * 100;
             document.getElementById('progressBar').style.width = `${progressPercent}%`;
             document.getElementById('progressText').textContent = `${Math.round(progressPercent)}% Complete`;
             
-            // Update dashboard stats
             document.getElementById('dashboardProgress').textContent = `${Math.round(progressPercent)}%`;
             document.getElementById('dashboardTokens').textContent = userProgress.tokens;
             document.getElementById('dashboardScore').textContent = userProgress.quizScores.length > 0 ? 
@@ -657,7 +1454,7 @@
             }, 4000);
         }
 
-        // Quiz functionality
+        // Other section functionality
         document.getElementById('startQuiz').addEventListener('click', function() {
             if (userProgress.completedModules.length === 0) {
                 showNotification('Complete at least one module to unlock quizzes!', 'warning');
@@ -666,16 +1463,14 @@
             showNotification('Quiz feature coming soon!', 'info');
         });
 
-        // Simulation functionality  
         document.getElementById('startSimulation').addEventListener('click', function() {
             showNotification('Trading simulation coming soon!', 'info');
         });
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            // App is ready
             console.log('BlockchainMaster initialized');
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98604bdc85cda912',t:'MTc1OTAzMTYzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98607c55c2bf2cde',t:'MTc1OTAzMzYxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
